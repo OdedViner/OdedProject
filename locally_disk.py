@@ -1,6 +1,7 @@
 import os
 import re
 import time
+import tempfile
 
 from hepler import send_cmd, TAGS, input_string
 
@@ -25,13 +26,15 @@ def copy_data_to_home_dir(num_files, file_size):
         return -1
 
     user = send_cmd("echo $USER").replace("\n", "")
+    temp_dir = tempfile.gettempdir()
+    temp_file_path = os.path.join(temp_dir, 'temp_file_name')
     cmd = (
-        "for i in {1..%s}; do dd if=/dev/urandom of=/home/%s/file$i bs=1M count=%s ; done &> temp_file.txt"
-        % (num_files, user, file_size)
+        "for i in {1..%s}; do dd if=/dev/urandom of=/home/%s/file$i bs=1M count=%s ; done &> %s"
+        % (num_files, user, file_size,temp_file_path)
     )
     os.popen(cmd)
     time.sleep(0.1)
-    file1 = open("temp_file.txt", "r")
+    file1 = open(temp_file_path, "r")
     lines = file1.readlines()
     sum_time = 0
     for line in lines:
